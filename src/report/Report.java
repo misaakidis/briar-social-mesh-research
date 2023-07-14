@@ -49,6 +49,8 @@ public abstract class Report {
 	 *  respective report classes for details. Default is 0. Must be a positive
 	 *  integer or 0. */
 	public static final String WARMUP_S = "warmup";
+	/** Cooldown period-setting id ({@value}) */
+	public static final String COOLDOWN_S = "cooldown";
 	/** Suffix of report files without explicit output */
 	public static final String OUT_SUFFIX = ".txt";
 	/** Suffix for reports that are created on n second intervals */
@@ -60,6 +62,7 @@ public abstract class Report {
 	private String prefix = "";
 	private int precision;
 	protected int warmupTime;
+	protected int cooldownTime;
 	protected Set<String> warmupIDs;
 
 	private int lastOutputSuffix;
@@ -94,6 +97,13 @@ public abstract class Report {
 		}
 		else {
 			this.warmupTime = 0;
+		}
+
+		if (settings.contains(COOLDOWN_S)) {
+			this.cooldownTime = settings.getInt(COOLDOWN_S);
+		}
+		else {
+			this.cooldownTime = Integer.MAX_VALUE;
 		}
 
 
@@ -273,11 +283,11 @@ public abstract class Report {
 	}
 
 	/**
-	 * Returns true if the warm up period is still ongoing (simTime < warmup)
-	 * @return true if the warm up period is still ongoing, false if not
+	 * Returns true if the warm up or cool down periods are ongoing (simTime < warmup || simTime > cooldown)
+	 * @return true if the warm up or cool down periods are still ongoing, false if not
 	 */
 	protected boolean isWarmup() {
-		return this.warmupTime > SimClock.getTime();
+		return this.warmupTime > SimClock.getTime() || this.cooldownTime < SimClock.getTime();
 	}
 
 	/**
