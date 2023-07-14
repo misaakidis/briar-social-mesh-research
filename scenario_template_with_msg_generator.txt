@@ -1,0 +1,64 @@
+## Scenario settings
+Scenario.name = ${SCENARIO}_${DATASET_NAME}_${SETTING}_${SETTING_ROUTER}_${ITERATION}
+# Connections are provided by external events queue (see Events1)
+Scenario.simulateConnections = false
+Scenario.updateInterval = 1
+Scenario.endTime = ${DATASET_END}
+
+Scenario.nrofHostGroups = 1
+Group.groupID = N
+Group.nrofHosts = ${DATASET_HOSTS}
+
+## Router parameters
+Group.router = ${SETTING_ROUTER}
+Group.bufferSize = ${SETTING_BUFFER}
+Group.msgTtl = ${SETTING_TTL}
+
+## Network interface parameters
+# "Bluetooth" interface for all nodes
+btInterface.type = SimpleBroadcastInterface
+btInterface.transmitSpeed = 1M
+btInterface.transmitRange = 10
+Group.nrofInterfaces = 2
+Group.interface1 = btInterface
+Group.interface2 = btInterface
+
+Events.nrof = 2
+ExternalEventsQueue.nrofPreload = 1000
+
+# Load connection events
+Events1.class = ExternalEventsQueue
+Events1.filePath = datasets/${DATASET_PATH}.txt
+
+
+## Message creation parameters
+Events2.class = MessageEventGenerator
+# Creation interval in seconds
+Events2.interval = ${SETTING_MSG_INTERVAL}
+# Message sizes (e.g. 500kB - 1MB)
+Events2.size = ${SETTING_MSG_SIZE}
+# range of message source/destination addresses
+Events2.hosts = 0,${DATASET_HOSTS}
+# Message ID prefix
+Events2.prefix = ${ITERATION}M
+
+## Report parameters
+Report.nrofReports = 7
+# length of the warm up and cool down periods (simulated seconds)
+Report.warmup = ${SETTING_WARMUP}
+Report.cooldown = ${DATASET_COOLDOWN}
+# default directory of reports
+Report.reportDir = reports/${SCENARIO}/${DATASET_NAME}/${SETTING}/${SETTING_ROUTER}
+# Report classes to load
+Report.report1 = MessageStatsReport
+Report.report2 = MessageDeliveryReport
+Report.report3 = BufferOccupancyReport
+Report.report4 = EncountersVSUniqueEncountersReport
+Report.report5 = ContactTimesReport
+Report.report6 = InterContactTimesReport
+Report.report7 = AdjacencyGraphvizReport
+
+
+Group.movementModel = StationaryMovement
+MovementModel.worldSize = 0, 0
+Group.nodeLocation = 0,0
