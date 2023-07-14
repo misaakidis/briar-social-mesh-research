@@ -1,0 +1,3 @@
+[submodule "toolkit/traceanalysis"]
+	path = toolkit/traceanalysis
+	url = https://github.com/julianofischer/traceanalysis.git
