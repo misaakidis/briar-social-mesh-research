@@ -1,8 +1,10 @@
 # Compiled files
 *.class
 
-# Simulation report files
-*reports*/*.txt
+datasets/
+scenarios/
+reports/
+results-*/
 
 # Javadocs
 *.html
