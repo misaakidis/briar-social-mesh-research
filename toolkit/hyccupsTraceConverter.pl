@@ -2,7 +2,7 @@
 
 # UPB HYCCUPS -> the ONE trace converter
 # Suitable for the "full_output.txt" from
-# https://crawdad.org/upb/hyccups/20161017/index.html
+# https://ieee-dataport.org/open-access/crawdad-upbhyccups
 # Implementation based on ../dieselnetConverter.pl
 
 # Connectivity Assumption:

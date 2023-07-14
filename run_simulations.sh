@@ -61,7 +61,7 @@ datasetCooldown[haggle]=1209600 # 2 weeks
 
 
 # crawdad / "upb/hyccups"
-# https://www.crawdad.org/upb/hyccups/20161017/index.html
+# https://ieee-dataport.org/open-access/crawdad-upbhyccups
 datasetPath[hyccupsoriginal]="hyccups-original"
 datasetHosts[hyccupsoriginal]=73
 datasetEnd[hyccupsoriginal]=5427862

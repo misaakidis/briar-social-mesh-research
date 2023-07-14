@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 
 /**
  * Social network and user interests are available at
- * https://crawdad.org/upb/hyccups/20161017/2012/
+ * https://ieee-dataport.org/open-access/crawdad-upbhyccups
  * 
  * Based on the UPB2012 parser available at
  * https://github.com/raduciobanu/mobemu/blob/master/src/mobemu/parsers/UPB.java#L211
