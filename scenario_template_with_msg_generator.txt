@@ -38,7 +38,7 @@ Events2.interval = ${SETTING_MSG_INTERVAL}
 # Message sizes (e.g. 500kB - 1MB)
 Events2.size = ${SETTING_MSG_SIZE}
 # range of message source/destination addresses
-Events2.hosts = 0,${DATASET_HOSTS}
+Events2.hosts = 0,${DATASET_HOSTS_GEN_MSGS}
 # Message ID prefix
 Events2.prefix = ${ITERATION}M
 

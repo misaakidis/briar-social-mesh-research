@@ -9,6 +9,7 @@ cpuCores=31
 # Select which simulations to execute
 traceanalysis=false
 scenarios_public=false
+scenarios_stations=false
 scenarios_briar=false
 scenarios_hybrid=false
 scenarios_mailboxes=false
@@ -42,17 +43,17 @@ declare -A datasetPath datasetHosts datasetEnd datasetCooldown
 datasetPath[haggleoriginal]="haggle-original"
 datasetHosts[haggleoriginal]=54
 datasetEnd[haggleoriginal]=987529
-datasetCooldown[haggleoriginal]=432000 # 5 days
+datasetCooldown[haggleoriginal]=86400 # 1 day
 
 datasetPath[haggleoriginalwithoutstations]="haggle-original-without-stations"
 datasetHosts[haggleoriginalwithoutstations]=36
 datasetEnd[haggleoriginalwithoutstations]=987529
-datasetCooldown[haggleoriginalwithoutstations]=432000 # 5 days
+datasetCooldown[haggleoriginalwithoutstations]=86400 # 1 day
 
 datasetPath[haggleoriginalhybridstations]="haggle-original-hybrid-stations"
 datasetHosts[haggleoriginalhybridstations]=54
 datasetEnd[haggleoriginalhybridstations]=987529
-datasetCooldown[haggleoriginalhybridstations]=432000 # 5 days
+datasetCooldown[haggleoriginalhybridstations]=86400 # 1 day
 
 datasetPath[haggle]="haggle-loop-67129-604800-5"
 datasetHosts[haggle]=54
@@ -199,7 +200,7 @@ fi
 
 if $scenarios_public ; then
 
-  datasets=("haggleoriginal" "haggleoriginalwithoutstations" "haggleoriginalhybridstations" "haggle" "hyccupsoriginal" "hyccups" "malawi" "office")
+  datasets=("haggle" "hyccupsoriginal" "hyccups" "malawi" "office")
   settings=("ideal" "realistic" "realisticttl" "floodttl")
   routers=("EpidemicRouter") # Random send queue mode
   iterations=1
@@ -212,6 +213,7 @@ if $scenarios_public ; then
     export DATASET_NAME=$DATASET
     export DATASET_PATH="${datasetPath[$DATASET]}"
     export DATASET_HOSTS="${datasetHosts[$DATASET]}"
+    export DATASET_HOSTS_GEN_MSGS="${datasetHosts[$DATASET]}"
     export DATASET_END="${datasetEnd[$DATASET]}"
     export DATASET_COOLDOWN="${datasetCooldown[$DATASET]}"
 
@@ -222,6 +224,62 @@ if $scenarios_public ; then
       export SETTING_TRANSMIT_SPEED="${settingTransmitSpeed[$SETTING]}"
       export SETTING_MSG_SIZE="${settingMsgSize[$SETTING]}"
       export SETTING_WARMUP="${settingWarmup[$SETTING]}"
+
+      # Compute message generation interval
+      totalDailyMessages=$((DATASET_HOSTS * ${settingNumOfDailyMsgsPerHost[$SETTING]}))
+      interval=$((24 * 60 * 60 / totalDailyMessages))
+      threshold=$((interval / 5))
+      minInterval=$((interval - threshold))
+      maxInterval=$((interval + threshold))
+      export SETTING_MSG_INTERVAL="$minInterval,$maxInterval"
+
+      for ROUTER in "${routers[@]}"; do
+          export SETTING_ROUTER=$ROUTER
+
+          for ((i=1; i<=$iterations; i++)); do
+            export ITERATION="0_0_${i}"
+            scenarioFile=scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}.txt
+            envsubst < scenario_template_with_msg_generator.txt > $scenarioFile
+            echo "./one.sh -b 1 $scenarioFile" >> scenarios/scenarios.txt
+          done
+      done
+
+    done
+  done
+
+fi
+
+
+###############################################################################
+# Stationary nodes scenarios (haggleoriginal)
+# Using ONE's message generator
+
+if $scenarios_stations ; then
+
+  datasets=("haggleoriginal" "haggleoriginalwithoutstations" "haggleoriginalhybridstations")
+  settings=("ideal" "realistic" "realisticttl" "floodttl")
+  routers=("EpidemicRouter") # Random send queue mode
+  iterations=1
+
+  export SCENARIO="stations"
+
+  for DATASET in "${datasets[@]}"; do
+    mkdir -p scenarios/$SCENARIO/$DATASET
+
+    export DATASET_NAME=$DATASET
+    export DATASET_PATH="${datasetPath[$DATASET]}"
+    export DATASET_HOSTS="${datasetHosts[$DATASET]}"
+    export DATASET_HOSTS_GEN_MSGS=36
+    export DATASET_END="${datasetEnd[$DATASET]}"
+    export DATASET_COOLDOWN="${datasetCooldown[$DATASET]}"
+
+    for SETTING in "${settings[@]}"; do
+      export SETTING
+      export SETTING_TTL="${settingTTL[$SETTING]}"
+      export SETTING_BUFFER="${settingBuffer[$SETTING]}"
+      export SETTING_TRANSMIT_SPEED="${settingTransmitSpeed[$SETTING]}"
+      export SETTING_MSG_SIZE="${settingMsgSize[$SETTING]}"
+      export SETTING_WARMUP=86400
 
       # Compute message generation interval
       totalDailyMessages=$((DATASET_HOSTS * ${settingNumOfDailyMsgsPerHost[$SETTING]}))
