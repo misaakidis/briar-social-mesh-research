@@ -61,7 +61,7 @@ datasetCooldown[haggleoriginalwithoutstations]=$((datasetEnd[haggleoriginalwitho
 datasetPath[haggleoriginalhybridstations]="haggle-original-hybrid-stations"
 datasetHosts[haggleoriginalhybridstations]=54
 datasetEnd[haggleoriginalhybridstations]=987529
-datasetCooldown[haggleoriginalhybridstations]=$((datasetEnd[[haggleoriginalhybridstations] - 86400)) # 1 day
+datasetCooldown[haggleoriginalhybridstations]=$((datasetEnd[haggleoriginalhybridstations] - 86400)) # 1 day
 
 datasetPath[haggle]="haggle-loop-67129-604800-5"
 datasetHosts[haggle]=54
