@@ -8,7 +8,8 @@ cpuCores=31
 
 # Select which simulations to execute
 traceanalysis=false
-scenarios_public=false
+scenarios_public_mesh=false
+scenarios_private_mesh=false
 scenarios_stations=false
 scenarios_briar=false
 scenarios_hybrid=false
@@ -205,7 +206,7 @@ fi
 # Public mesh scenarios for all datasets
 # Using ONE's message generator
 
-if $scenarios_public ; then
+if $scenarios_public_mesh ; then
 
   datasets=("haggle" "hyccupsoriginal" "hyccups" "malawi" "office")
   settings=("ideal" "realistic" "realisticttl" "floodttl")
@@ -314,7 +315,7 @@ fi
 
 
 ###############################################################################
-# Hybrid nodes scenarios (hyccups)
+# Public mesh Hybrid nodes scenarios (hyccups)
 
 if $scenarios_hybrid ; then
   export SCENARIO="hybrid"
@@ -366,7 +367,7 @@ fi
 
 
 ###############################################################################
-# Mailboxes scenarios (hyccups)
+# Public mesh Mailboxes scenarios (hyccups)
 
 if $scenarios_mailboxes ; then
   export SCENARIO="mailbox"
@@ -418,16 +419,18 @@ fi
 
 
 ###############################################################################
-# Current Briar: Single-hop between contacts (hyccupsonlycontacts)
+# Current Briar: Single-hop between contacts with hybrid nodes and mailboxes (hyccupsonlycontacts)
 
 if $scenarios_briar ; then
 
   export SCENARIO="briar"
 
   datasets=("hyccupsonlycontacts")
-  settings=("ideal" "realistic" "realisticttl" "floodttl")
-  routers=("EpidemicRouter") # Random send queue mode
+  settings=("realistic")
+  routers=("EpidemicRouterBriar") # Random send queue mode
   iterations=1
+  numOfHybridNodes=("0" "10" "20")
+  numOfMailboxNodes=("0" "10" "20")
 
   for DATASET in "${datasets[@]}"; do
     mkdir -p scenarios/$SCENARIO/$DATASET
@@ -449,14 +452,19 @@ if $scenarios_briar ; then
         export SETTING_ROUTER=$ROUTER
 
         for ((i=1; i<=$iterations; i++)); do
-          export ITERATION="0_0_${i}"
+          for numOfHybrids in "${numOfHybridNodes[@]}"; do
+            for numOfMailboxes in "${numOfMailboxNodes[@]}"; do
+              export ITERATION="${numOfHybrids}_${numOfMailboxes}_${i}"
+              export DATASET_HOSTS=$((datasetHosts[$DATASET] + numOfMailboxes))
+          
+              # Generate messages and highly available nodes connections
+              java -cp target social.HyccupsMsgCreator ${numOfHybrids} ${numOfMailboxes} ${i} "${hyccupsMsgSize[$SETTING]}" "${hyccupsNumOfDailyMsgsPerHost[$SETTING]}" true | sort -t$'\t' -k1 -n > scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}_messages.txt
 
-          # Generate messages
-          java -cp target social.HyccupsMsgCreator 0 0 ${i} "${hyccupsMsgSize[$SETTING]}" "${hyccupsNumOfDailyMsgsPerHost[$SETTING]}" true | sort -t$'\t' -k1 -n > scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}_messages.txt
-
-          scenarioFile=scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}.txt
-          envsubst < scenario_template.txt > $scenarioFile
-          echo "./one.sh -b 1 $scenarioFile" >> scenarios/scenarios.txt
+              scenarioFile=scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}.txt
+              envsubst < scenario_template.txt > $scenarioFile
+              echo "./one.sh -b 1 $scenarioFile" >> scenarios/scenarios.txt
+            done
+          done
         done
       
       done
@@ -466,12 +474,68 @@ fi
 
 
 ###############################################################################
+# Private mesh with hybrid nodes and mailboxes (hyccupsonlycontacts)
+
+if $scenarios_private_mesh ; then
+
+  export SCENARIO="private"
+
+  datasets=("hyccupsonlycontacts")
+  settings=("ideal" "realistic" "realisticttl" "floodttl")
+  routers=("EpidemicRouter") # Random send queue mode
+  iterations=1
+  numOfHybridNodes=("0" "10" "20")
+  numOfMailboxNodes=("0" "10" "20")
+
+  for DATASET in "${datasets[@]}"; do
+    mkdir -p scenarios/$SCENARIO/$DATASET
+
+    export DATASET_NAME=$DATASET
+    export DATASET_PATH="${datasetPath[$DATASET]}"
+    export DATASET_HOSTS="${datasetHosts[$DATASET]}"
+    export DATASET_END="${datasetEnd[$DATASET]}"
+    export DATASET_COOLDOWN="${datasetCooldown[$DATASET]}"
+
+    for SETTING in "${settings[@]}"; do
+      export SETTING
+      export SETTING_TTL="${settingTTL[$SETTING]}"
+      export SETTING_BUFFER="${settingBuffer[$SETTING]}"
+      export SETTING_TRANSMIT_SPEED="${settingTransmitSpeed[$SETTING]}"
+      export SETTING_WARMUP="${settingWarmup[$SETTING]}"
+
+      for ROUTER in "${routers[@]}"; do
+        export SETTING_ROUTER=$ROUTER
+
+        for ((i=1; i<=$iterations; i++)); do
+          for numOfHybrids in "${numOfHybridNodes[@]}"; do
+            for numOfMailboxes in "${numOfMailboxNodes[@]}"; do
+              export ITERATION="${numOfHybrids}_${numOfMailboxes}_${i}"
+              export DATASET_HOSTS=$((datasetHosts[$DATASET] + numOfMailboxes))
+          
+              # Generate messages and highly available nodes connections
+              java -cp target social.HyccupsMsgCreator ${numOfHybrids} ${numOfMailboxes} ${i} "${hyccupsMsgSize[$SETTING]}" "${hyccupsNumOfDailyMsgsPerHost[$SETTING]}" false | sort -t$'\t' -k1 -n > scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}_messages.txt
+
+              scenarioFile=scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}.txt
+              envsubst < scenario_template.txt > $scenarioFile
+              echo "./one.sh -b 1 $scenarioFile" >> scenarios/scenarios.txt
+            done
+          done
+        done
+      
+      done
+    done
+  done
+fi
+
+###############################################################################
 # Social mesh scenarios, with hybrid nodes and mailboxes (hyccups)
+# Simulations with the hyccupsonlycontacts dataset correspond to Private Social Mesh,
+# while simulations with the hyccups dataset correspond to Public Social Mesh.
 
 if $scenarios_social ; then
   export SCENARIO="social"
 
-  datasets=("hyccups")
+  datasets=("hyccupsonlycontacts" "hyccups")
   settings=("ideal" "realistic" "realisticttl" "floodttl")
   routers=("SocialRouterHyccups")
   iterations=1
@@ -503,7 +567,7 @@ if $scenarios_social ; then
               export ITERATION="${numOfHybrids}_${numOfMailboxes}_${i}"
               export DATASET_HOSTS=$((datasetHosts[$DATASET] + numOfMailboxes))
 
-              # Generate messages and mailbox connections
+              # Generate messages and highly available nodes connections
               java -cp target social.HyccupsMsgCreator ${numOfHybrids} ${numOfMailboxes} ${i} "${hyccupsMsgSize[$SETTING]}" "${hyccupsNumOfDailyMsgsPerHost[$SETTING]}" false | sort -t$'\t' -k1 -n > scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}_messages.txt
 
               scenarioFile=scenarios/$SCENARIO/$DATASET/${SETTING}_${ROUTER}_${ITERATION}.txt
