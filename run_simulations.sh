@@ -15,6 +15,13 @@ scenarios_hybrid=false
 scenarios_mailboxes=false
 scenarios_social=false
 
+if [ -f "scenarios/scenarios.txt" ]; then
+    echo "Found previous deployment. This script does not track active simulation processes across subsequent runs."
+    echo "Make sure previous simulations have completed execution and you have archived their results."
+    echo "Exiting..."
+    exit 1
+fi
+
 # Compile ONE simulator with latest updates on routers, report generators and dataset-specific packages
 ./compile.sh
 
