@@ -43,22 +43,22 @@ declare -A datasetPath datasetHosts datasetEnd datasetCooldown
 datasetPath[haggleoriginal]="haggle-original"
 datasetHosts[haggleoriginal]=54
 datasetEnd[haggleoriginal]=987529
-datasetCooldown[haggleoriginal]=86400 # 1 day
+datasetCooldown[haggleoriginal]=$((datasetEnd[haggleoriginal] - 86400)) # 1 day
 
 datasetPath[haggleoriginalwithoutstations]="haggle-original-without-stations"
 datasetHosts[haggleoriginalwithoutstations]=36
 datasetEnd[haggleoriginalwithoutstations]=987529
-datasetCooldown[haggleoriginalwithoutstations]=86400 # 1 day
+datasetCooldown[haggleoriginalwithoutstations]=$((datasetEnd[haggleoriginalwithoutstations] - 86400)) # 1 day
 
 datasetPath[haggleoriginalhybridstations]="haggle-original-hybrid-stations"
 datasetHosts[haggleoriginalhybridstations]=54
 datasetEnd[haggleoriginalhybridstations]=987529
-datasetCooldown[haggleoriginalhybridstations]=86400 # 1 day
+datasetCooldown[haggleoriginalhybridstations]=$((datasetEnd[[haggleoriginalhybridstations] - 86400)) # 1 day
 
 datasetPath[haggle]="haggle-loop-67129-604800-5"
 datasetHosts[haggle]=54
 datasetEnd[haggle]=3005275
-datasetCooldown[haggle]=1209600 # 2 weeks
+datasetCooldown[haggle]=$((datasetEnd[haggle] - 1209600)) # 2 weeks
 
 
 # crawdad / "upb/hyccups"
@@ -66,7 +66,7 @@ datasetCooldown[haggle]=1209600 # 2 weeks
 datasetPath[hyccupsoriginal]="hyccups-original"
 datasetHosts[hyccupsoriginal]=73
 datasetEnd[hyccupsoriginal]=5427862
-datasetCooldown[hyccupsoriginal]=432000 # 5 days
+datasetCooldown[hyccupsoriginal]=$((datasetEnd[hyccupsoriginal] - 432000)) # 5 days
 # ./toolkit/hyccupsTraceConverter.pl -out ./datasets/"${datasetPath[hyccupsoriginal]}".txt ./datasets/hyccups/upb-hyccups-full_output.txt
 
 datasetPath[hyccups]="hyccups-loop-0-4838400-3"
@@ -74,14 +74,14 @@ datasetPath[hyccups]="hyccups-loop-0-4838400-3"
 # Parsing example: https://github.com/raduciobanu/mobemu/blob/master/src/mobemu/parsers/UPB.java#L211
 datasetHosts[hyccups]=73
 datasetEnd[hyccups]=14106341
-datasetCooldown[hyccups]=4838400 # 8 weeks
+datasetCooldown[hyccups]=$((datasetEnd[hyccups] - 4838400)) # 8 weeks
 # Loop End = first trace timestamp + loop period = 1330701836 + 4838400 = 1335540236 * 1000 milliseconds
 # ./toolkit/hyccupsTraceConverter.pl -out ./datasets/"${datasetPath[hyccups]}".txt -loops 3 -loopEnd 1335540236000 ./datasets/hyccups/upb-hyccups-full_output.txt
 
 datasetPath[hyccupsonlycontacts]="hyccups-loop-0-4838400-3-only-contacts"
 datasetHosts[hyccupsonlycontacts]=73
 datasetEnd[hyccupsonlycontacts]=14106341
-datasetCooldown[hyccupsonlycontacts]=4838400 # 8 weeks
+datasetCooldown[hyccupsonlycontacts]=$((datasetEnd[hyccupsonlycontacts] - 4838400)) # 8 weeks
 
 
 # sociopatterns / "tnet_malawi_pilot"
@@ -89,7 +89,7 @@ datasetCooldown[hyccupsonlycontacts]=4838400 # 8 weeks
 datasetPath[malawi]="malawi-loop-124461-604800-5"
 datasetHosts[malawi]=86
 datasetEnd[malawi]=3023999
-datasetCooldown[malawi]=1209600 # 2 weeks
+datasetCooldown[malawi]=$((datasetEnd[malawi] - 1209600)) # 2 weeks
 
 
 # sociopatterns / office 2nd deployment
@@ -97,7 +97,7 @@ datasetCooldown[malawi]=1209600 # 2 weeks
 datasetPath[office]="office-loop-36241-604800-5"
 datasetHosts[office]=92
 datasetEnd[office]=3023599
-datasetCooldown[office]=1209600 # 2 weeks
+datasetCooldown[office]=$((datasetEnd[office] - 1209600)) # 2 weeks
 
 
 ###############################################################################
